@@ -44,8 +44,7 @@ VectorXi sortIndices(const VectorXi &comparison_vector) {
 	return index;
 }
 
-void sortMatrix(MatrixXi &M){
-	int n = M.rows();
+void sortMatrix(MatrixXi &M, int n){
 	VectorXi V(n);
 	V = sortIndices(M.col(n));
 	sortColumns(M, V);

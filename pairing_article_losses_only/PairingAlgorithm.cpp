@@ -6,54 +6,55 @@ tuple<int, int> roundsAndMatches(int rounds, int matches){
 
 tuple<int, int> PairingAlgorithm::topDown(VectorXi V){
 	int m{0}, top_k{0};
-	MatrixXi M(n, n+5); //by default initialized to 0 but for some reason it gets crazy at some point so we need to assign
+	MatrixXi M(n, n+3); //by default initialized to 0 but for some reason it gets crazy at some point so we need to assign
 						//it 0 value anyway
+	vector< vector<int> > lookup_table(n, vector<int>(2, 0)); 
 	
 	for(int i=0; i<n; ++i){
 		for(int j=0; j<n; ++j){
 			M(i,j) = -1;
 		}
-		M(i,n) = 0;		//number of losses
-		M(i,n+1) = 0;	//is paired flag
-		M(i,n+2) = 1;	//is active flag
-		M(i,n+3) = V(i);
-		M(i,n+4) = i;
+		M(i,n) = 0;		//is paired flag
+		M(i,n+1) = 1;	//is active flag
+		M(i,n+2) = V(i);
+		// lookup_table[i][0] = 0; //number of losses
+		lookup_table[i][1] = i; //starting position		
 	}
-	
+
 	for(int r=1; r<=n; ++r){
 	//	cout << "===================================" << endl;
 	//	cout << "ROUND " << r << endl;
 	//	cout << "===================================" << endl;
 		for(int i=0; i<n-1; ++i){
-			if(M(i,n+1)==0 && M(i,n+2)==1){	//active and not yet paired
+			if(M(lookup_table[i][1],n)==0 && M(lookup_table[i][1],n+1)==1){	//active and not yet paired
 				for(int j=i+1; j<n; ++j){
-					if(M(j,n+1)==0 && M(j,n+2)==1 && M(i,j)==-1){
+					if(M(lookup_table[j][1],n)==0 && M(lookup_table[j][1],n+1)==1 && M(lookup_table[i][1],lookup_table[j][1])==-1){
 						++m;
-						M(j,n+1) = 1;
-						recordResult(i,j,M);
+						M(lookup_table[j][1],n) = 1;
+						recordResult(i,j,lookup_table,M,n);
 						break;
 					}
 				}
 			}
 		}
 		
-		updateTransitivity(M);
-		
-		for(int i=0; i<n; ++i) M(i,n+1) = 0;
-		sortMatrix(M);
+		sortLookup(lookup_table);
+		updateTransitivity(lookup_table, M, n);	
+		sortLookup(lookup_table);	
+		for(int i=0; i<n; ++i) M(i,n) = 0;
 		
 		for(int i=0; i<n-1; ++i){
-			if(M(i,n+2)==1){
-				if(M(i,n) < M(i+1,n)){
+			if(M(lookup_table[i][1],n+1)==1){
+				if(lookup_table[i][0] < lookup_table[i+1][0]){
 					++top_k;
-					M(i,n+2) = 0;
+					M(lookup_table[i][1],n+1) = 0;
 					if(top_k==k){
 						return roundsAndMatches(r, m);
 					}
 				} else { break;	}
 			}
 		}
-	
+
 		if(top_k==n-1){
 			return roundsAndMatches(r, m);		
 		}

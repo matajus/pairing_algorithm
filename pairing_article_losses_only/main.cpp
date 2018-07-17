@@ -1,6 +1,5 @@
 #include <ctime>
-#include <algorithm>
-#include <vector>
+#include <numeric>
 #include "PairingAlgorithm.h"
 
 double meanForHugeValues(vector<int> const& v) { //if we deal with more than 23mil. ints in our vector
@@ -25,6 +24,7 @@ int main(){
 	cin >> n;
 	cout << "Enter the number of winners:" << endl;
 	cin >> k;
+
 	PairingAlgorithm pairing_algorithm{n, k};
 	
 	VectorXi V;
@@ -32,7 +32,7 @@ int main(){
 	//sort(V.data(),V.data()+V.size());  //we don't need this since it is already sorted
 	//int i{0};
 	do {
-//		++i;
+		//++i;
 		tie(rounds, matches) = pairing_algorithm.topDown(V);
 		rounds_vector.push_back(rounds);
 		matches_vector.push_back(matches);
